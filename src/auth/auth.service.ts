@@ -2,9 +2,9 @@ import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,8 +14,8 @@ export class AuthService {
   ) {}
 
   async registration(createUserDto: CreateUserDto) {
-    const newUser = await this.userService.createUser(createUserDto);
-    return newUser;
+    const userToken = await this.userService.createUser(createUserDto);
+    return userToken;
   }
 
   login(user: User) {
@@ -29,10 +29,11 @@ export class AuthService {
     const user = await this.userService.getUserByName(username);
     const passwordIdMatch = await argon2.verify(user.password, password);
     if (user && passwordIdMatch) {
-      return user;
+      return {
+        ...user,
+        password: undefined,
+      };
     }
-    throw new UnauthorizedException({
-      message: 'Некорректные поля Юзернейм или Пароль',
-    });
+    throw new UnauthorizedException('Некорректные поля Юзернейм или Пароль');
   }
 }

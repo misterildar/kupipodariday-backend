@@ -6,8 +6,8 @@ import {
   Patch,
   Param,
   Delete,
-  Controller,
   UseGuards,
+  Controller,
 } from '@nestjs/common';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';

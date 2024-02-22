@@ -4,7 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { FindManyOptions, FindOneOptions, In, Repository } from 'typeorm';
 
 import { Wish } from './entities/wish.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -19,6 +19,7 @@ export class WishesService {
   ) {}
 
   async create(createWishDto: CreateWishDto, user: User) {
+    delete user.password;
     const wish = {
       ...createWishDto,
       owner: user,
@@ -34,6 +35,10 @@ export class WishesService {
     return await this.wishesRepository.findOne(query);
   }
 
+  async findBy(id: number[]) {
+    return this.wishesRepository.findBy({ id: In(id) });
+  }
+
   async getLastWishes() {
     return await this.findMany({ order: { createdAt: 'DESC' }, take: 40 });
   }
@@ -45,9 +50,14 @@ export class WishesService {
   async getWishById(id: number) {
     const wish = await this.findOne({
       where: { id },
-      relations: { owner: true },
+      relations: {
+        owner: true,
+        offers: true,
+        wishlists: true,
+      },
     });
     if (!wish) throw new NotFoundException('Подарок не найден');
+    delete wish.owner.password;
     return wish;
   }
 
@@ -57,14 +67,27 @@ export class WishesService {
       throw new ForbiddenException(
         'Вы можете редактировать только свои подарки!',
       );
-    return await this.wishesRepository.update(id, updateWishDto);
+    if (updateWishDto.price > wish.price && wish.raised > 0) {
+      throw new ForbiddenException(
+        'Вы можете изменять стоимость только тех подарков на которые еще не начался сбор средств!',
+      );
+    }
+    await this.wishesRepository.update(id, updateWishDto);
+    return {};
   }
 
   async removeOne(id: number, userId: number) {
     const wish = await this.getWishById(id);
-    if (wish.owner.id !== userId)
+    if (wish.owner.id !== userId) {
       throw new ForbiddenException('Вы можете удалять только свои подарки!');
-    return await this.wishesRepository.delete(id);
+    }
+    if (wish.raised > 0) {
+      throw new ForbiddenException(
+        'Вы можете удалить только тот подарок на который еще не начался сбор средств!',
+      );
+    }
+    await this.wishesRepository.delete(id);
+    return wish;
   }
 
   async wishCopy(wishId: number, user: User) {
@@ -90,7 +113,10 @@ export class WishesService {
       owner: user,
     };
     await this.create(wishCopy, user);
-
     return {};
+  }
+
+  async updateRaised(id: number, updateWishDto: UpdateWishDto) {
+    return await this.wishesRepository.update(id, updateWishDto);
   }
 }

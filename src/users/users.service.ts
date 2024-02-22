@@ -1,12 +1,7 @@
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  HttpStatus,
-  Injectable,
-  HttpException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 
 import { User } from './entities/user.entity';
@@ -33,7 +28,7 @@ export class UsersService {
         where: { username },
       });
       if (existUserName) {
-        throw new BadRequestException(
+        throw new ForbiddenException(
           'Такое имя уже существует, выберите пожалуйста другое',
         );
       }
@@ -43,7 +38,7 @@ export class UsersService {
         where: { email },
       });
       if (existUserEmail) {
-        throw new BadRequestException(
+        throw new ForbiddenException(
           'Такой email уже существует, выберите пожалуйста другой',
         );
       }
@@ -77,7 +72,6 @@ export class UsersService {
       where: { username },
       relations: { wishes: true },
     });
-    this.deletePassword(user);
     return user.wishes;
   }
 
@@ -93,16 +87,12 @@ export class UsersService {
     const { username, email, password } = createUserDto;
     const existEmail = await this.findOne({ where: { email } });
     if (existEmail) {
-      throw new HttpException(
-        'Пользователь с таким email уже существует',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new ForbiddenException('Пользователь с таким email уже существует');
     }
     const existUserName = await this.findOne({ where: { username } });
     if (existUserName) {
-      throw new HttpException(
+      throw new ForbiddenException(
         'Пользователь с таким именем уже существует',
-        HttpStatus.BAD_REQUEST,
       );
     }
     const hachPassword = await argon2.hash(password);

@@ -2,6 +2,7 @@ import {
   Entity,
   Column,
   ManyToOne,
+  JoinTable,
   ManyToMany,
   CreateDateColumn,
   UpdateDateColumn,
@@ -37,7 +38,7 @@ export class Wishlist {
   @Length(1, 250)
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   @IsOptional()
   @IsString()
   @Length(1, 1500)
@@ -48,6 +49,7 @@ export class Wishlist {
   image: string;
 
   @ManyToMany(() => Wish, (wish) => wish.wishlists)
+  @JoinTable()
   items: Wish[];
 
   @ManyToOne(() => User, (user) => user.wishlists)

@@ -15,6 +15,7 @@ import {
   IsOptional,
   IsNotEmpty,
 } from 'class-validator';
+
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
