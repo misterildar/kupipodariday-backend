@@ -1,4 +1,3 @@
-import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, ForbiddenException } from '@nestjs/common';
@@ -7,6 +6,7 @@ import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { HelpersService } from 'src/helpers/helpers.service';
 
 @Injectable()
 export class UsersService {
@@ -14,6 +14,7 @@ export class UsersService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private helpersService: HelpersService,
   ) {}
 
   getMe(user: User) {
@@ -44,7 +45,7 @@ export class UsersService {
       }
     }
     if (password) {
-      updateUserDto.password = await argon2.hash(password);
+      updateUserDto.password = await this.helpersService.hashPassword(password);
     }
     await this.userRepository.update(id, updateUserDto);
     const { ...updateUserData } = await this.findOne({ where: { id } });
@@ -95,7 +96,7 @@ export class UsersService {
         'Пользователь с таким именем уже существует',
       );
     }
-    const hachPassword = await argon2.hash(password);
+    const hachPassword = await this.helpersService.hashPassword(password);
     const user = await this.userRepository.save({
       ...createUserDto,
       password: hachPassword,

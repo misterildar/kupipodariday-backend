@@ -1,9 +1,9 @@
-import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
+import { HelpersService } from 'src/helpers/helpers.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
@@ -11,6 +11,7 @@ export class AuthService {
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,
+    private helpersService: HelpersService,
   ) {}
 
   async registration(createUserDto: CreateUserDto) {
@@ -27,7 +28,10 @@ export class AuthService {
 
   async validateUser(username: string, password: string) {
     const user = await this.userService.getUserByName(username);
-    const passwordIdMatch = await argon2.verify(user.password, password);
+    const passwordIdMatch = await this.helpersService.verifyPassword(
+      user.password,
+      password,
+    );
     if (user && passwordIdMatch) {
       return {
         ...user,

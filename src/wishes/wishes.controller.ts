@@ -13,6 +13,7 @@ import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RequestWithUser } from 'src/utils/request-user';
 
 @Controller('wishes')
 export class WishesController {
@@ -20,7 +21,7 @@ export class WishesController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Body() createWishDto: CreateWishDto, @Req() req) {
+  create(@Body() createWishDto: CreateWishDto, @Req() req: RequestWithUser) {
     return this.wishesService.create(createWishDto, req.user);
   }
 
@@ -43,7 +44,7 @@ export class WishesController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   updateById(
-    @Req() req,
+    @Req() req: RequestWithUser,
     @Param('id') id: string,
     @Body() updateWishDto: UpdateWishDto,
   ) {
@@ -52,13 +53,13 @@ export class WishesController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string, @Req() req) {
+  remove(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.wishesService.removeOne(+id, req.user.id);
   }
 
   @Post(':id/copy')
   @UseGuards(JwtAuthGuard)
-  copy(@Param('id') wishId: string, @Req() req) {
+  copy(@Param('id') wishId: string, @Req() req: RequestWithUser) {
     return this.wishesService.wishCopy(+wishId, req.user);
   }
 }

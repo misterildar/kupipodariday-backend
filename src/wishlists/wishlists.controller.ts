@@ -13,6 +13,7 @@ import { WishlistsService } from './wishlists.service';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RequestWithUser } from 'src/utils/request-user';
 
 @Controller('wishlistlists')
 @UseGuards(JwtAuthGuard)
@@ -25,7 +26,10 @@ export class WishlistsController {
   }
 
   @Post()
-  create(@Body() createWishlistDto: CreateWishlistDto, @Req() req) {
+  create(
+    @Body() createWishlistDto: CreateWishlistDto,
+    @Req() req: RequestWithUser,
+  ) {
     return this.wishlistsService.create(createWishlistDto, req.user);
   }
 
@@ -36,7 +40,7 @@ export class WishlistsController {
 
   @Patch(':id')
   update(
-    @Req() req,
+    @Req() req: RequestWithUser,
     @Param('id') id: string,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
@@ -44,7 +48,7 @@ export class WishlistsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() req) {
+  remove(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.wishlistsService.remove(+id, req.user.id);
   }
 }
