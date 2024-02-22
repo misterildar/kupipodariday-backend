@@ -17,7 +17,7 @@ export class UsersService {
   ) {}
 
   getMe(user: User) {
-    this.deletePassword(user);
+    this.deletePasswordAndEmail(user);
     return user;
   }
 
@@ -48,7 +48,7 @@ export class UsersService {
     }
     await this.userRepository.update(id, updateUserDto);
     const { ...updateUserData } = await this.findOne({ where: { id } });
-    this.deletePassword(updateUserData);
+    this.deletePasswordAndEmail(updateUserData);
     return updateUserData;
   }
 
@@ -59,7 +59,7 @@ export class UsersService {
         wishes: { owner: true },
       },
     });
-    this.deletePassword(user);
+    this.deletePasswordAndEmail(user);
     return user.wishes;
   }
 
@@ -79,7 +79,7 @@ export class UsersService {
     const [...user] = await this.findMany({
       where: [{ username: emailOrName }, { email: emailOrName }],
     });
-    this.deletePassword(user[0]);
+    this.deletePasswordAndEmail(user[0]);
     return user;
   }
 
@@ -119,8 +119,9 @@ export class UsersService {
     return this.userRepository.find(query);
   }
 
-  deletePassword(user: User) {
+  deletePasswordAndEmail(user: User) {
     delete user.password;
+    delete user.email;
     return user;
   }
 }

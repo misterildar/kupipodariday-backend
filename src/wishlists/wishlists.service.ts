@@ -27,12 +27,16 @@ export class WishlistsService {
         owner: true,
       },
     });
-    wishList.map((wish) => delete wish.owner.password);
+    wishList.map((wish) => {
+      delete wish.owner.password;
+      delete wish.owner.email;
+    });
     return wishList;
   }
 
   async create(createWishlistDto: CreateWishlistDto, user: User) {
     delete user.password;
+    delete user.email;
     const { itemsId } = createWishlistDto;
     const items = await this.wishesService.findBy(itemsId);
     const wishList = {
@@ -50,6 +54,7 @@ export class WishlistsService {
     });
     if (!wishList) throw new NotFoundException('Коллекция не найдена');
     delete wishList.owner.password;
+    delete wishList.owner.email;
     return wishList;
   }
 

@@ -16,7 +16,6 @@ export class OffersService {
   ) {}
 
   async create(createOfferDto: CreateOfferDto, user: User) {
-    delete user.password;
     const { itemId, amount } = createOfferDto;
     const wish = await this.wishesService.getWishById(itemId);
     if (wish.owner.id === user.id)

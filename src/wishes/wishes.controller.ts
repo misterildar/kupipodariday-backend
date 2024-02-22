@@ -15,7 +15,6 @@ import { UpdateWishDto } from './dto/update-wish.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('wishes')
-@UseGuards(JwtAuthGuard)
 export class WishesController {
   constructor(private readonly wishesService: WishesService) {}
 

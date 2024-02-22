@@ -19,12 +19,12 @@ export class WishesService {
   ) {}
 
   async create(createWishDto: CreateWishDto, user: User) {
-    delete user.password;
     const wish = {
       ...createWishDto,
       owner: user,
     };
-    return await this.wishesRepository.save(wish);
+    await this.wishesRepository.save(wish);
+    return {};
   }
 
   async findMany(query: FindManyOptions<Wish>) {
@@ -44,7 +44,7 @@ export class WishesService {
   }
 
   async getTopWishes() {
-    return await this.findMany({ order: { copied: 'DESC' }, take: 20 });
+    return await this.findMany({ order: { copied: 'DESC' }, take: 10 });
   }
 
   async getWishById(id: number) {
@@ -58,6 +58,7 @@ export class WishesService {
     });
     if (!wish) throw new NotFoundException('Подарок не найден');
     delete wish.owner.password;
+    delete wish.owner.email;
     return wish;
   }
 

@@ -32,6 +32,7 @@ export class AuthService {
       return {
         ...user,
         password: undefined,
+        email: undefined,
       };
     }
     throw new UnauthorizedException('Некорректные поля Юзернейм или Пароль');
